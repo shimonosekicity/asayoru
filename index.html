@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>朝晩28日メニュー</title>
+<meta name="description" content="朝5〜10分・夜25〜50分のやさしい習慣づくりアプリ">
+<meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15161f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="朝晩メニュー">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* 画面：スマホ1列。上から「今日の朝・夜」→記録→カレンダー→食事→体→設定 */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --fg:#23263a; --muted:#6b6f86; --line:#e1e3ec;
+  --am:#e9895a; --am-soft:#fdeee5; --pm:#5a5fc4; --pm-soft:#ebecfb;
+  --ok:#3e9b74; --ok-soft:#e3f3ec;
+  --display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Noto Sans JP",sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15161f; --surface:#1f2130; --fg:#eceef7; --muted:#9a9eb8; --line:#2e3145;
+  --am:#f19f75; --am-soft:#3a2a24; --pm:#8f93ee; --pm-soft:#272a4a; --ok:#5cc196; --ok-soft:#1f3a30; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15161f; --surface:#1f2130; --fg:#eceef7; --muted:#9a9eb8; --line:#2e3145;
+  --am:#f19f75; --am-soft:#3a2a24; --pm:#8f93ee; --pm-soft:#272a4a; --ok:#5cc196; --ok-soft:#1f3a30; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:520px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(48px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:24px;letter-spacing:.02em}
+h2{font-size:17px}
+h3{font-size:15px}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.pill.test{background:#fff3c4;color:#6b5200;border-color:#e5c84a}
+.card{background:var(--surface);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line)}
+.slot{border:none}
+.slot.am{background:var(--am-soft)} .slot.pm{background:var(--pm-soft)}
+.slot-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.1em;white-space:nowrap}
+.slot-top .min{text-align:right}
+.am .tag{color:var(--am)} .pm .tag{color:var(--pm)}
+.min{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.title{font-family:var(--display);font-size:20px;font-weight:700;margin:0}
+ul.items{margin:0;padding-left:1.1em;color:var(--fg);font-size:14px}
+ul.items li.n{list-style:none;margin-left:-1.1em}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links a{font-size:12.5px;text-decoration:none;color:var(--fg);background:var(--surface);border:1px solid var(--fg);padding:4px 10px;border-radius:999px;font-weight:700}
+.links a::before{content:"▶ ";color:#d33}
+.links a .num{margin-right:3px}
+.links.opt a{font-weight:500;border-color:var(--line);color:var(--muted)}
+.opt-label{font-size:11.5px;color:var(--muted);margin:2px 0 -4px}
+.tip{font-size:12px;margin:0;padding:6px 10px;border-radius:10px;background:var(--surface);color:var(--fg)}
+.tip::before{content:"⚠ "}
+.btns{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid transparent;padding:11px 10px;font-weight:700;color:inherit;touch-action:manipulation}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--pm);outline-offset:2px}
+.am .full{background:var(--am);color:#fff} .pm .full{background:var(--pm);color:#fff}
+.mini{background:var(--surface);color:var(--fg);border-color:var(--line);font-size:13px}
+.done-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);border-radius:12px;padding:10px 12px;font-weight:700;color:var(--ok)}
+.done-row button{background:none;color:var(--muted);font-weight:500;font-size:12px;padding:4px 6px}
+.rest{color:var(--muted);font-size:14px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wk{font-size:11px;color:var(--muted);grid-column:1/-1;margin-top:4px;letter-spacing:.05em}
+.d{aspect-ratio:1;max-width:100%;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;position:relative}
+.d.half{background:linear-gradient(135deg,var(--ok-soft) 50%,var(--bg) 50%);color:var(--fg)}
+.d.both{background:var(--ok);color:#fff;font-weight:700}
+.d.restd{background:var(--line)}
+.d.today{outline:2px solid var(--fg);outline-offset:1px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.food label{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.food label:first-of-type{border-top:none}
+.food input{width:20px;height:20px;accent-color:var(--ok);flex:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=number],input[type=date],input[type=time],select{font:inherit;font-size:16px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+input[type=number]{width:96px}
+.save{background:var(--fg);color:var(--bg);padding:8px 14px}
+.ghost{background:var(--bg);border-color:var(--line);color:var(--fg);padding:8px 14px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:700;max-width:calc(100% - 32px);text-align:center;z-index:10}
+.note{font-size:12px;color:var(--muted);margin:0}
+.back{background:var(--ok-soft);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.back b{font-family:var(--display);font-size:17px;color:var(--ok)}
+.nudge{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+.nudge button{background:var(--fg);color:var(--bg);padding:6px 12px;font-size:12.5px;flex:none}
+.nudge button.later{background:none;color:var(--muted);font-weight:500;padding:6px 6px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{font-size:12px;padding:5px 10px;border-radius:999px;border:1px dashed var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.badge.on{border:1px solid var(--ok);background:var(--ok-soft);color:var(--fg);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--bg);border:1px solid var(--line);color:var(--fg);font-weight:500;font-size:13.5px;padding:8px 12px;border-radius:999px}
+.chip[aria-pressed="true"]{background:var(--pm-soft);border-color:var(--pm);font-weight:700}
+.chart{width:100%;height:auto;display:block}
+.chart text{font-size:10px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.kv{display:flex;gap:16px;flex-wrap:wrap;font-size:13px}
+.kv b{font-family:var(--display);font-size:18px;font-variant-numeric:tabular-nums}
+details.settings{background:var(--surface);border:1px solid var(--line);border-radius:18px}
+details.settings>summary{list-style:none;cursor:pointer;padding:14px 16px;font-family:var(--display);font-weight:700;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+details.settings>summary::-webkit-details-marker{display:none}
+details.settings>summary::after{content:"＋";color:var(--muted)}
+details.settings[open]>summary::after{content:"－"}
+.sbody{padding:0 16px 16px;display:flex;flex-direction:column;gap:18px}
+.sec{display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.box{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.box ol{margin:0;padding-left:1.3em}
+.box b{font-weight:700}
+.hidden{display:none!important}
+/* タブ */
+.tab{display:flex;flex-direction:column;gap:18px}
+body[data-tab="today"] .tab[data-tab="meal"],body[data-tab="meal"] .tab[data-tab="today"]{display:none}
+.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 16px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabbar button{flex:1;max-width:240px;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:0;font-size:12px;padding:6px}
+.tabbar button span{font-size:20px;line-height:1.2}
+.tabbar button[aria-current="page"]{color:var(--fg)}
+body.calmode .tabbar{display:none}
+.teaser{display:flex;align-items:center;gap:10px;text-align:left;background:var(--ok-soft);color:var(--fg);border-radius:14px;padding:10px 14px;font-weight:500;font-size:14px}
+.teaser b{font-family:var(--display)}
+.teaser .go{margin-left:auto;color:var(--muted);flex:none}
+.tips{margin:0;padding-left:1.1em;font-size:13.5px;display:flex;flex-direction:column;gap:4px}
+.loggrid{display:grid;grid-template-columns:3.2em 1fr;gap:6px 8px;align-items:center;font-size:13px}
+.loggrid .opts{display:flex;flex-wrap:wrap;gap:6px}
+.loggrid button{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-weight:500}
+.loggrid button[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+.switch input{width:22px;height:22px;accent-color:var(--ok)}
+/* 今日のごはん */
+.meal{background:var(--ok-soft);border:none}
+.meal .tag{color:var(--ok)}
+.kbar{height:10px;border-radius:999px;background:var(--surface);overflow:hidden;position:relative}
+.kbar i{position:absolute;inset:0 auto 0 0;background:var(--ok);border-radius:999px}
+.kbar b{position:absolute;top:0;bottom:0;border-left:2px dashed var(--muted)}
+.mrow{background:var(--surface);border-radius:12px}
+.mrow>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer}
+.mrow>summary::-webkit-details-marker{display:none}
+.mrow .slotname{font-size:11.5px;font-weight:700;color:var(--ok);width:3.2em;flex:none}
+.mrow .mname{flex:1;font-size:13.5px;line-height:1.4}
+.mrow .kc{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.mrow .ate{flex:none;font-size:12px;padding:5px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--fg)}
+.mrow .ate[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.recipe{padding:0 12px 12px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.recipe ul,.recipe ol{margin:0;padding-left:1.3em}
+.recipe .ing{color:var(--muted)}
+.extras{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
+.extras button{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:500}
+.extras .x{background:var(--bg)}
+/* 目標 */
+.goal{display:flex;flex-direction:column;gap:6px}
+.goal .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gbar{height:14px;border-radius:999px;background:var(--bg);position:relative;overflow:hidden}
+.gbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--am),var(--pm));border-radius:999px}
+.gbar s{position:absolute;top:2px;bottom:2px;width:2px;background:var(--surface);opacity:.8}
+.gnow{font-family:var(--display);font-size:15px}
+.gnow b{font-size:22px}
+.miles{display:flex;flex-wrap:wrap;gap:6px}
+.week details{border-top:1px solid var(--line);padding:6px 0}
+.week summary{cursor:pointer;font-size:14px;font-weight:700}
+.week ul{margin:4px 0 0;padding-left:1.2em;font-size:13px}
+.shop{columns:2;column-gap:16px;font-size:13px;margin:0;padding-left:1.2em}
+.pill.sm{font-size:10.5px;padding:1px 7px;vertical-align:1px;white-space:nowrap}
+button.sm{font-size:12.5px;padding:6px 10px}
+.golink{display:inline-block;align-self:flex-start;background:var(--fg);color:var(--bg);text-decoration:none;font-weight:700;padding:7px 12px;border-radius:10px}
+.plan-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+.plan-row .pd{width:6.2em;flex:none;font-weight:700;font-size:12.5px}
+.plan-row .pn{flex:1;line-height:1.4}
+.plan-row button{flex:none}
+dialog#picker{width:min(520px,calc(100% - 24px));max-height:calc(100% - 40px);border:none;border-radius:18px;padding:16px;background:var(--surface);color:var(--fg)}
+dialog#picker::backdrop{background:rgba(0,0,0,.45)}
+dialog#picker[open]{display:flex;flex-direction:column;gap:10px}
+.pick-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pick-list{display:flex;flex-direction:column;gap:6px}
+dialog#picker{overflow:auto}
+.custom summary{cursor:pointer}
+.custom[open]{display:flex;flex-direction:column;gap:8px}
+.pick-item{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;background:var(--bg);border:1px solid var(--line);font-weight:500;font-size:13.5px}
+.pick-item.cur{border-color:var(--ok);background:var(--ok-soft)}
+input[type=text],input[type=url]{font:inherit;font-size:16px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:up .25s ease-out}@keyframes up{from{opacity:0;transform:translate(-50%,8px)}}}
+</style>
+</head>
+<body data-tab="today">
+<div class="wrap" id="main">
+  <header class="head">
+    <div>
+      <h1>朝晩28日メニュー</h1>
+      <p class="sub" id="dateLine">今日のメニュー</p>
+    </div>
+    <span class="pill" id="dayPill">Day 1 / 28</span>
+  </header>
+
+<div class="tab" data-tab="today">
+  <div class="back" id="back" hidden><b>おかえりなさい！</b><span>戻ってきただけで十分です。今日は「5分だけ版」からでOK。</span></div>
+
+  <section class="card slot am" id="amCard" aria-label="朝のメニュー"></section>
+  <section class="card slot pm" id="pmCard" aria-label="夜のメニュー"></section>
+  <button class="teaser" id="dinTeaser" data-gotab="meal"></button>
+
+  <div class="nudge" id="nudge" hidden><span id="nudgeText"></span><span class="row" style="flex:none;gap:4px"><button class="later" id="nudgeLater">あとで</button><button id="nudgeBtn">設定する</button></span></div>
+
+  <section class="stats" aria-label="記録">
+    <div class="stat"><b id="streak">0</b><span>連続日数（1日休みはセーフ）</span></div>
+    <div class="stat"><b id="total">0</b><span>やった回数</span></div>
+    <div class="stat"><b id="mins">0</b><span>動いた合計（分）</span></div>
+    <div class="stat"><b id="wdiff">–</b><span>体重の変化（kg）</span></div>
+  </section>
+
+  <section class="card">
+    <h2>バッジ</h2>
+    <div class="badges" id="badges"></div>
+    <p class="note" id="nextBadge"></p>
+  </section>
+
+  <section class="card">
+    <h2 id="gridTitle">28日のきろく</h2>
+    <div class="grid" id="grid"></div>
+    <div class="legend"><span><i style="background:var(--ok)"></i>朝晩どちらも</span><span><i style="background:var(--ok-soft)"></i>どちらか1つ</span><span><i style="background:var(--line)"></i>休む日</span></div>
+    <p class="note">「5分だけ版」でも1回にカウントします。朝か夜どちらか1つやれば連続日数が続きます。28日が終わったら自動で次の周に進みます。</p>
+  </section>
+
+  <section class="card">
+    <h2>今日の体の変化</h2>
+    <div class="chips" id="feels"></div>
+    <p class="note" id="feelNote">体重より先に、こういう変化が出てきます。当てはまるものをタップ。</p>
+  </section>
+
+  <section class="card">
+    <h2>体重とお腹まわり</h2>
+    <div class="row">
+      <input type="number" id="wIn" step="0.1" min="30" max="150" inputmode="decimal" placeholder="体重" aria-label="体重 kg"><span>kg</span>
+      <input type="number" id="cIn" step="0.5" min="40" max="150" inputmode="decimal" placeholder="お腹" aria-label="お腹まわり cm"><span>cm</span>
+      <button class="save" id="wSave">記録する</button>
+    </div>
+    <div class="goal" id="goalBox"></div>
+    <div class="kv" id="bodyKv"></div>
+    <div id="chart"></div>
+    <p class="note">体重は毎日でも週1回でもOK。1日ごとの増減は水分なので気にせず、太い線（7日間の平均）だけ見てください。点線は目標と「1週間に0.5kg」の目安ペースです。お腹まわりはおへその高さで、週1回測るのがおすすめです。</p>
+  </section>
+
+
+
+  <details class="settings" id="settings">
+    <summary>設定・お知らせ・バックアップ</summary>
+    <div class="sbody">
+
+      <div class="sec" id="notifySec" style="border-top:none;padding-top:0">
+        <h3>朝と夜のお知らせ</h3>
+        <div class="row">
+          <label>朝 <input type="time" id="amTime" step="300"></label>
+          <label>夜 <input type="time" id="pmTime" step="300"></label>
+        </div>
+        <p class="note">スマホのカレンダーに、これから8週間ぶんの「今日のメニュー」を予定として入れます。予定の時刻になるとカレンダーがお知らせしてくれます（日曜の夜はお休みなので入りません）。</p>
+        <button class="save" id="calBtn">カレンダーに追加する</button>
+        <p class="note" id="calStatus"></p>
+        <div class="box hidden" id="calHelp"></div>
+      </div>
+
+      <div class="sec" id="goalSec">
+        <h3>からだの目標</h3>
+        <div class="row">
+          <label>身長 <input type="number" id="pHeight" step="0.5" min="120" max="200" inputmode="decimal" style="width:80px"> cm</label>
+          <label>年齢 <input type="number" id="pAge" step="1" min="15" max="90" inputmode="numeric" style="width:70px"> 歳</label>
+        </div>
+        <div class="row">
+          <label>スタート体重 <input type="number" id="pStart" step="0.1" min="30" max="200" inputmode="decimal" placeholder="自動" style="width:80px"> kg</label>
+          <label>目標 <input type="number" id="pGoal" step="0.1" min="30" max="150" inputmode="decimal" style="width:80px"> kg</label>
+        </div>
+        <button class="save" id="pSave">保存する</button>
+        <p class="note">スタート体重が空なら、最初に記録した体重を使います。年齢を入れると、1日のカロリーの目安が出ます（基礎代謝のMifflin-St Jeor式×1.4−400kcal。ただし1,200kcalと基礎代謝より下にはしません）。数字はあくまで目安です。生理前や疲れた日は、多めに食べても大丈夫です。</p>
+      </div>
+
+      <div class="sec" id="backupSec">
+        <h3>バックアップ</h3>
+        <p class="note">記録はこのスマホの中だけに保存されています。機種変更の前や、月に1回くらい「書き出す」をしておくと安心です。</p>
+        <div class="row">
+          <button class="save" id="exportBtn">書き出す</button>
+          <button class="ghost" id="importBtn">読み込む</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+        <p class="note" id="backupStatus"></p>
+      </div>
+
+      <div class="sec">
+        <h3>スタート日</h3>
+        <div class="row"><input type="date" id="startIn" aria-label="スタート日"><button class="save" id="startSave">変更する</button></div>
+        <p class="note">スタート日を変えると、メニューの週が変わります。カレンダーのお知らせも入れ直してください。</p>
+      </div>
+
+      <div class="sec">
+        <h3>見た目</h3>
+        <div class="row">
+          <select id="themeSel" aria-label="テーマ">
+            <option value="auto">スマホの設定に合わせる</option>
+            <option value="light">ライト</option>
+            <option value="dark">ダーク</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>このアプリについて</h3>
+        <div class="box" id="installHelp"></div>
+        <p class="note" id="storageNote"></p>
+      </div>
+    </div>
+  </details>
+</div>
+
+<div class="tab" data-tab="meal">
+  <section class="card meal" id="mealCard" aria-label="今夜のごはん"></section>
+
+  <section class="card">
+    <h2>朝・昼・おやつのコツ</h2>
+    <ul class="tips">
+      <li><b>朝</b>：たんぱく質＋少しの主食（例：卵・納豆・ヨーグルト＋ごはん軽く1杯 or パン1枚）</li>
+      <li><b>昼</b>：主食・たんぱく質・野菜をそろえる（コンビニなら おにぎり＋サラダチキン＋サラダ）</li>
+      <li><b>おやつ</b>：1日100kcalくらい（果物・ナッツ10粒・ヨーグルトなど）</li>
+    </ul>
+    <p class="note" id="kcalGuide"></p>
+    <h3 style="margin-top:6px">今日の食事ルール</h3>
+    <div class="food" id="foods"></div>
+  </section>
+
+  <section class="card" id="logCard"></section>
+
+  <section class="card week">
+    <h2>1週間の夜ごはん</h2>
+    <div id="weekBody" style="display:flex;flex-direction:column;gap:6px"></div>
+  </section>
+</div>
+
+</div>
+
+<!-- Safari で「カレンダーに追加」するための画面（#cal=… のリンクで開いたときだけ表示） -->
+<div class="wrap hidden" id="calPage">
+  <header class="head"><div><h1>カレンダーに追加</h1><p class="sub">朝晩28日メニューのお知らせ</p></div></header>
+  <section class="card">
+    <p id="calPageText" style="margin:0"></p>
+    <button class="save" id="calPageBtn">カレンダーに追加する</button>
+    <p class="note">「すべてを追加」をタップすると、予定がカレンダーに入ります。終わったら、このタブは閉じてホーム画面のアプリに戻ってください。</p>
+  </section>
+</div>
+
+<dialog id="picker" aria-labelledby="pickTitle">
+  <div class="pick-head"><h2 id="pickTitle">夜ごはん</h2><button class="ghost sm" id="pickClose">閉じる</button></div>
+  <p class="note" id="pickBudget"></p>
+  <div class="chips" id="pickTags"></div>
+  <div class="pick-list" id="pickList"></div>
+  <details class="sec custom">
+    <summary><h3 style="display:inline">自分で決める（外食・ほかのレシピなど）</h3></summary>
+    <div class="row"><input type="text" id="cName" maxlength="40" placeholder="料理の名前（例：鶏むねの照り焼き）" style="flex:1;min-width:0"></div>
+    <div class="row"><label>約 <input type="number" id="cKcal" min="50" max="2000" step="10" inputmode="numeric" placeholder="450" style="width:90px"> kcal（ごはんこみ・わからなければ空でOK）</label></div>
+    <div class="row"><input type="url" id="cUrl" placeholder="レシピのURL（なくてもOK）" style="flex:1;min-width:0"></div>
+    <button class="save" id="cSave">これにする</button>
+  </details>
+  <button class="ghost" id="pickAuto" style="margin-top:8px">決めずに、おすすめにまかせる</button>
+</dialog>
+
+<nav class="tabbar" id="tabbar" aria-label="画面の切りかえ">
+  <button data-gotab="today" aria-current="page"><span aria-hidden="true">🏃‍♀️</span>今日</button>
+  <button data-gotab="meal"><span aria-hidden="true">🍽</span>ごはん</button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="core.js"></script>
+<script src="meals.js"></script>
+<script src="recipes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
